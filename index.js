@@ -17,7 +17,34 @@ app.use(express.static('public'));
 app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
+function sendDate(parsedate,res){
+  const options = {
+    weekday: 'short', // Fri
+    year: 'numeric',  // 2015
+    month: 'long',   // December
+    day: 'numeric',  // 25
+    timeZone: 'GMT'  // GMT timezone
+  };
+  const houroptions= {
+    hour: '2-digit', // 00 (padded)
+    minute: '2-digit', // 00 (padded)
+    second : '2-digit',
+    hour12: false  ,  // 25
+    timeZone: 'UTC'
+  }
 
+  unixtimestamp =parsedate.getTime() ;
+  utcdate = parsedate.toLocaleDateString('en-US',options) +
+   ' '+ 
+   parsedate.toLocaleTimeString('en-US',houroptions)+ ' GMT';
+
+  res.json(
+    {
+      unix : unixtimestamp ,
+      utc : utcdate
+    }
+  )
+ }
 
 // your first API endpoint... 
 app.get("/api/hello", function (req, res) {
@@ -27,59 +54,34 @@ app.get("/api/hello", function (req, res) {
 app.get('/api/:date?',function(req,res){
    const datestring = req.params.date;
    try{
-    function sendDate(parsedate){
-      const options = {
-        weekday: 'short', // Fri
-        year: 'numeric',  // 2015
-        month: 'long',   // December
-        day: 'numeric',  // 25
-        timeZone: 'GMT'  // GMT timezone
-      };
-      const houroptions= {
-        hour: '2-digit', // 00 (padded)
-        minute: '2-digit', // 00 (padded)
-        second : '2-digit',
-        hour12: false  ,  // 25
-        timeZone: 'UTC'
-      }
-    
-      unixtimestamp =parsedate.getTime() ;
-      utcdate = parsedate.toLocaleDateString('en-US',options) +
-       ' '+ 
-       parsedate.toLocaleTimeString('en-US',houroptions)+ ' GMT';
-    
-      res.json(
-        {
-          unix : unixtimestamp ,
-          utc : utcdate
-        }
-      )
-     }
-    
+
      let parsedate = new Date(datestring);     
-       console.log('date parsed',parsedate);
+       console.log('date parsed',datestring);
       // console.log('date parsed',parsedate.getTime())
 
      if(isNaN(parsedate.getTime())){
-      if((datestring)=>{
-        const parsedValue = parseInt(datestring, 10);
-        return !isNaN(parsedValue) && parsedValue >= 0; 
-      }){
-
+      if(datestring && /^\d+$/.test(datestring) && parseInt(datestring, 10) >= 0)
+       {
           parsedate=new Date(parseInt(datestring, 10)*1);
           console.log('sema unix timestamp',parsedate);
-          sendDate(parsedate);
-        }else{
+          sendDate(parsedate,res);
+        }else if(datestring === undefined)
+        {
+          parsedate=new Date();
+          console.log('sema vide',parsedate);
+          sendDate(parsedate,res);
+        }else 
+        {
           console.log('date not valid');
-       return res.status(400).json({error:'Invalid Date'});
+         return res.status(400).json({error:'Invalid Date'});
         }
      }
-     else{
-      sendDate(parsedate);
+     else
+     {
+      sendDate(parsedate,res);
       }
    }
    catch(error){
-
    }
    
 })
