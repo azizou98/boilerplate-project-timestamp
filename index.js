@@ -21,7 +21,7 @@ function sendDate(parsedate,res){
   const options = {
     weekday: 'short', // Fri
     year: 'numeric',  // 2015
-    month: 'long',   // December
+    month: 'short',   // Dec
     day: 'numeric',  // 25
     timeZone: 'GMT'  // GMT timezone
   };
@@ -34,9 +34,7 @@ function sendDate(parsedate,res){
   }
 
   unixtimestamp =parsedate.getTime() ;
-  utcdate = parsedate.toLocaleDateString('en-US',options) +
-   ' '+ 
-   parsedate.toLocaleTimeString('en-US',houroptions)+ ' GMT';
+  utcdate = parsedate.toUTCString();
 
   res.json(
     {
@@ -47,9 +45,6 @@ function sendDate(parsedate,res){
  }
 
 // your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
-});
 
 app.get('/api/:date?',function(req,res){
    const datestring = req.params.date;
